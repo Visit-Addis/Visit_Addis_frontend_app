@@ -1,36 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:visit_addis_frontend_app/features/hotels/presentation/pages/hotel_detail.dart';
-import 'package:visit_addis_frontend_app/features/hotels/presentation/pages/hotel_list.dart';
-
+import 'package:visit_addis_frontend_app/features/home/presentation/home_screen.dart';
 void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Visit Addis',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      initialRoute: '/hotels',
-      routes: {
-        '/hotels': (context) => const HotelList(),
-        '/hotels/detail': (context) => const HotelDetail(),
-      },
+  runApp(
+    MaterialApp(
       debugShowCheckedModeBanner: false,
-      onGenerateRoute: (settings) {
-        // Handle 404 errors or complex routes
-        return MaterialPageRoute(
-          builder:
-              (context) =>
-                  const Scaffold(body: Center(child: Text('Page not found!'))),
-        );
-      },
-    );
-  }
+      home: HomeScreen(),
+    ));
 }
+

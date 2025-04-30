@@ -100,6 +100,8 @@ class _HotelListState extends State<HotelList> {
                   ],
                 ),
               ),
+
+
               const SizedBox(height: 20),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -188,7 +190,7 @@ class _HotelListState extends State<HotelList> {
                         ), // Adjust padding
                         minimumSize: MaterialStateProperty.all(
                           Size(80, 30),
-                        ), // Set minimum width and height
+                        ),
                       ),
                       onPressed: () {},
                       child: Text(
@@ -202,6 +204,8 @@ class _HotelListState extends State<HotelList> {
                   ],
                 ),
               ),
+
+
               const SizedBox(height: 20),
               ListView.builder(
                 shrinkWrap: true,

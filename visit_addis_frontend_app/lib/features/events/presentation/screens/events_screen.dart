@@ -1,129 +1,191 @@
 import 'package:flutter/material.dart';
-import 'event_detail_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/events_provider.dart';
+import '../widgets/event_card.dart';
+import '../widgets/event_filter_bar.dart';
+import 'event_details_screen.dart';
 
-class EventsScreen extends StatelessWidget {
+class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
+
+  @override
+  State<EventsScreen> createState() => _EventsScreenState();
+}
+
+class _EventsScreenState extends State<EventsScreen> with SingleTickerProviderStateMixin {
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedCategory;
+  String? _selectedTimeFilter;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<EventsProvider>().fetchEvents(context: context);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _onSearch(String query) {
+    context.read<EventsProvider>().fetchEvents(
+          searchQuery: query,
+          category: _selectedCategory,
+          timeFilter: _selectedTimeFilter,
+          context: context,
+        );
+  }
+
+  void _onCategorySelected(String? category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+    context.read<EventsProvider>().fetchEvents(
+          category: category,
+          searchQuery: _searchController.text,
+          timeFilter: _selectedTimeFilter,
+          context: context,
+        );
+  }
+
+  void _onTimeFilterSelected(String? timeFilter) {
+    setState(() {
+      _selectedTimeFilter = timeFilter;
+    });
+    context.read<EventsProvider>().fetchEvents(
+          timeFilter: timeFilter,
+          category: _selectedCategory,
+          searchQuery: _searchController.text,
+          context: context,
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Events'),
-        backgroundColor: Colors.white,
-        elevation: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'All Events'),
+            Tab(text: 'Bookmarked'),
+          ],
+          onTap: (index) {
+            if (index == 1) {
+              context.read<EventsProvider>().fetchBookmarkedEvents(context);
+            } else {
+              context.read<EventsProvider>().fetchEvents(context: context);
+            }
+          },
+        ),
       ),
-      body: Column(
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Discover what\'s happening in Addis',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search events...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('All', true),
-                      _buildFilterChip('Today', false),
-                      _buildFilterChip('This Week', false),
-                      _buildFilterChip('This Month', false),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 4,
-              itemBuilder: (context, index) {
-                return _buildEventItem(context);
-              },
-            ),
-          ),
+          _buildEventsList(),
+          _buildEventsList(),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, bool selected) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: FilterChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (bool value) {},
-        selectedColor: const Color(0xFF2E7D32),
-        labelStyle: TextStyle(color: selected ? Colors.white : Colors.black),
-        backgroundColor: Colors.white,
-        shape: StadiumBorder(
-          side: BorderSide(
-            color: selected ? const Color(0xFF2E7D32) : Colors.grey.shade300,
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildEventsList() {
+    return Consumer<EventsProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-  Widget _buildEventItem(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const EventDetailScreen()),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Sat, May 15 - 2:00 PM',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Event Name Here',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Row(
+        if (provider.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                const Text('Venue Name', style: TextStyle(color: Colors.grey)),
-                const SizedBox(width: 16),
-                const Icon(Icons.category, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                const Text(
-                  'Cultural Festival',
-                  style: TextStyle(color: Colors.grey),
+                Text(provider.error!),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_tabController.index == 1) {
+                      provider.fetchBookmarkedEvents(context);
+                    } else {
+                      provider.fetchEvents(context: context);
+                    }
+                  },
+                  child: const Text('Retry'),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_tabController.index == 0) ...[
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search events...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onChanged: _onSearch,
+                  ),
+                  const SizedBox(height: 16),
+                  EventFilterBar(
+                    onCategorySelected: _onCategorySelected,
+                    onTimeFilterSelected: _onTimeFilterSelected,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (provider.events.isEmpty)
+                  const Center(
+                    child: Text('No events found'),
+                  )
+                else
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: provider.events.length,
+                    itemBuilder: (context, index) {
+                      final event = provider.events[index];
+                      return EventCard(
+                        event: event,
+                        onTap: () {
+                          provider.selectEvent(event);
+                          Navigator.pushNamed(
+                            context,
+                            '/event-details',
+                            arguments: event.id,
+                          );
+                        },
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

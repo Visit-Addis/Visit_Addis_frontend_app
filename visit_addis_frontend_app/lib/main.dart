@@ -19,12 +19,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/attractions',
+      initialRoute: '/attractions/detail',
       routes: {
         '/hotels': (context) => const HotelList(),
         '/hotels/detail': (context) => const HotelDetail(),
         '/attractions': (context) => const AttractionList(),
-        'attractions/detail': (context) => const AttractionDetail(),
+        '/attractions/detail': (context) => const AttractionDetail(),
       },
       debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) {

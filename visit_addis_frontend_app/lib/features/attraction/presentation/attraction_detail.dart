@@ -107,7 +107,10 @@ class _AttractionDetailState extends State<AttractionDetail> {
                               ? Icons.favorite
                               : Icons.favorite_border_sharp,
                           size: 25,
-                          color: isFavorite ? Colors.pinkAccent : Colors.white,
+                          color:
+                              isFavorite
+                                  ? const Color.fromARGB(255, 233, 60, 167)
+                                  : Colors.white,
                         ),
                         onPressed: () {
                           setState(() {
@@ -142,9 +145,11 @@ class _AttractionDetailState extends State<AttractionDetail> {
               ),
               const SizedBox(height: 20),
               Text(
-                attraction[0]['name'],
+                "Hope entairtainement event",
                 style: const TextStyle(
-                    fontSize: 23, fontWeight: FontWeight.bold),
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               Row(
@@ -191,8 +196,10 @@ class _AttractionDetailState extends State<AttractionDetail> {
                   const Divider(),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading:
-                        const Icon(Icons.monetization_on, color: Colors.green),
+                    leading: const Icon(
+                      Icons.monetization_on,
+                      color: Colors.green,
+                    ),
                     title: const Text(
                       "Entry Fee",
                       style: TextStyle(
@@ -200,8 +207,10 @@ class _AttractionDetailState extends State<AttractionDetail> {
                         fontSize: 16,
                       ),
                     ),
-                    subtitle: const Text("200 ETB",
-                        style: TextStyle(fontSize: 14)),
+                    subtitle: const Text(
+                      "200 ETB",
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                 ],
               ),
@@ -214,7 +223,7 @@ class _AttractionDetailState extends State<AttractionDetail> {
               Text(attraction[0]['about']),
               const SizedBox(height: 20),
               const Text(
-                "Photos in Sky light hotel",
+                "Upcoming events",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
@@ -285,7 +294,10 @@ class _AttractionDetailState extends State<AttractionDetail> {
                     children: [
                       Icon(Icons.language, color: Colors.black),
                       SizedBox(width: 8),
-                      Text("Visit Website", style: TextStyle(color: Colors.black)),
+                      Text(
+                        "Visit Website",
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ],
                   ),
                 ),

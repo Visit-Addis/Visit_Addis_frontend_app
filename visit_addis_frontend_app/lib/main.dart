@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/attractions/detail',
+      initialRoute: '/hotels',
       routes: {
         '/hotels': (context) => const HotelList(),
         '/hotels/detail': (context) => const HotelDetail(),

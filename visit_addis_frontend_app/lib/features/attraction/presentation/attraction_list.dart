@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visit_addis_frontend_app/features/attraction/presentation/attraction_detail.dart';
 
 class AttractionList extends StatefulWidget {
   const AttractionList({super.key});
@@ -133,8 +134,8 @@ class _AttractionListState extends State<AttractionList> {
               child: Row(
                 children: [
                   _buildFilterButton('All'),
-                  _buildFilterButton('Traditional'),
-                  _buildFilterButton('Modern'),
+                  _buildFilterButton('Historical'),
+                  _buildFilterButton('Museum'),
                   _buildFilterButton('Cafes'),
                   _buildFilterButton('International'),
                 ],
@@ -261,7 +262,12 @@ class _AttractionListState extends State<AttractionList> {
           minimumSize: const Size(100, 40),
           padding: const EdgeInsets.symmetric(horizontal: 12),
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AttractionDetail()),
+          );
+        },
         child: Text(
           text,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),

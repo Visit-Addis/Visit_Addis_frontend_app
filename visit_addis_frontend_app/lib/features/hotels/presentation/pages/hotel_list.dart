@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visit_addis_frontend_app/features/attraction/presentation/attraction_list.dart';
 import 'package:visit_addis_frontend_app/features/hotels/presentation/pages/hotel_detail.dart';
 
 class HotelList extends StatefulWidget {
@@ -101,7 +102,6 @@ class _HotelListState extends State<HotelList> {
                 ),
               ),
 
-
               const SizedBox(height: 20),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -138,7 +138,14 @@ class _HotelListState extends State<HotelList> {
                           const Color.fromARGB(255, 94, 235, 167),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AttractionList(),
+                          ),
+                        );
+                      },
                       child: Text(
                         'Traditional',
                         style: TextStyle(
@@ -188,9 +195,7 @@ class _HotelListState extends State<HotelList> {
                         padding: MaterialStateProperty.all(
                           EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                         ), // Adjust padding
-                        minimumSize: MaterialStateProperty.all(
-                          Size(80, 30),
-                        ),
+                        minimumSize: MaterialStateProperty.all(Size(80, 30)),
                       ),
                       onPressed: () {},
                       child: Text(
@@ -204,7 +209,6 @@ class _HotelListState extends State<HotelList> {
                   ],
                 ),
               ),
-
 
               const SizedBox(height: 20),
               ListView.builder(
@@ -259,7 +263,6 @@ class _HotelListState extends State<HotelList> {
                   );
                 },
               ),
-
             ],
           ),
         ),

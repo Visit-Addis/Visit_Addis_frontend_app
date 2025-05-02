@@ -38,6 +38,7 @@ class _HotelDetailState extends State<HotelDetail> {
         ),
       ),
       body: SingleChildScrollView(
+
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -145,6 +146,8 @@ class _HotelDetailState extends State<HotelDetail> {
                   Text(" Location Address: ${hotel[0]['location']}"),
                 ],
               ),
+
+
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -185,6 +188,8 @@ class _HotelDetailState extends State<HotelDetail> {
                   },
                 ),
               ),
+
+
               const SizedBox(height: 30),
               OutlinedButton(
                 style: ButtonStyle(
@@ -216,7 +221,7 @@ class _HotelDetailState extends State<HotelDetail> {
                   shape: MaterialStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.zero, // Set to zero for sharp corners
+                          BorderRadius.zero,
                     ),
                   ),
                 ),

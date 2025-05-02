@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visit_addis_frontend_app/features/attraction/presentation/attraction_detail.dart';
 
 class AttractionList extends StatefulWidget {
   const AttractionList({super.key});
@@ -13,9 +14,9 @@ class _AttractionListState extends State<AttractionList> {
     {
       "image": 'images/entoto.jpg',
       "description":
-          "Entoto park one of the most tourist attractive place in Addis Ababa Ethiopia, click over and explore what Entoto park has to over.",
+          "Entoto Park is one of the most attractive tourist destinations in Addis Ababa, Ethiopia. Click here to explore all that Entoto Park has to offer!",
       "name": "Entoto Park",
-      "rating": 5,
+      "rating": 3,
     },
     {
       "image": 'images/artkillo.jpg',
@@ -133,8 +134,8 @@ class _AttractionListState extends State<AttractionList> {
               child: Row(
                 children: [
                   _buildFilterButton('All'),
-                  _buildFilterButton('Traditional'),
-                  _buildFilterButton('Modern'),
+                  _buildFilterButton('Historical'),
+                  _buildFilterButton('Museum'),
                   _buildFilterButton('Cafes'),
                   _buildFilterButton('International'),
                 ],
@@ -162,7 +163,7 @@ class _AttractionListState extends State<AttractionList> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          attract['name'],
+                          "${attract['name']}: A Must-Visit Destination in Addis Ababa, Ethiopia",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -176,7 +177,6 @@ class _AttractionListState extends State<AttractionList> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              // This makes the text take available space
                               child: Text(
                                 attract['description'],
                                 style: const TextStyle(
@@ -188,19 +188,57 @@ class _AttractionListState extends State<AttractionList> {
                               ),
                             ),
 
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isFavorite = !isFavorite;
-                                });
-                              },
-                              icon: Icon(
-                                isFavorite
-                                    ? Icons.favorite_border_outlined
-                                    : Icons.favorite,
-                                color: Colors.pinkAccent,
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    94,
+                                    231,
+                                    179,
+                                  ),
+                                  width: 2,
+                                ),
+                              ),
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    isFavorite = !isFavorite;
+                                  });
+                                },
+                                icon: Icon(
+                                  isFavorite
+                                      ? Icons.favorite_border_outlined
+                                      : Icons.favorite,
+                                  color: const Color.fromARGB(
+                                    255,
+                                    93,
+                                    241,
+                                    185,
+                                  ),
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 13),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          spacing: 4,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text("Rating: "),
+                            for (int i = 0; i < 5; i++) ...[
+                              if (i < attract['rating'])
+                                Icon(Icons.star, color: Colors.yellow)
+                              else
+                                Icon(
+                                  Icons.star_border,
+                                  color: const Color.fromARGB(255, 12, 12, 12),
+                                ),
+                            ],
                           ],
                         ),
                       ),
@@ -224,7 +262,12 @@ class _AttractionListState extends State<AttractionList> {
           minimumSize: const Size(100, 40),
           padding: const EdgeInsets.symmetric(horizontal: 12),
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AttractionDetail()),
+          );
+        },
         child: Text(
           text,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visit_addis_frontend_app/features/home/presentation/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/events/presentation/providers/events_provider.dart';
@@ -56,6 +57,8 @@ class MyApp extends StatelessWidget {
           
           // Fall back to manual routes
           switch (settings.name) {
+            case "/":
+                return MaterialPageRoute(builder: (_) => const HomeScreen());
             case '/hotels':
               return MaterialPageRoute(builder: (_) => const HotelList());
             case '/hotels/detail':
@@ -72,9 +75,10 @@ class MyApp extends StatelessWidget {
               );
           }
         },
-        initialRoute: '/login', 
+        initialRoute: '/', 
         debugShowCheckedModeBanner: false,
       ),
     );
   }
 }
+

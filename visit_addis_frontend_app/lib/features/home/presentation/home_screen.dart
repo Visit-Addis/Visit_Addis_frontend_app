@@ -1,135 +1,244 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:visit_addis_frontend_app/features/hotels/presentation/pages/hotel_list.dart';
 
-class HomeScreen extends StatelessWidget {
-  final Color greenColor = Color(0xFF00A86B);
+import '../../../features/profile/presentation/pages/profile_screen.dart';
+import '../../attraction/presentation/attraction_list.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import '../../auth/presentation/screens/login_screen.dart';
+import '../../events/presentation/screens/events_screen.dart';
 
-  HomeScreen({super.key}); // Custom green
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _children = [
+    const HomeContent(),      // Index 0 - Home
+    const AttractionList(),   // Index 1 - Discover
+    const EventsScreen(),     // Index 2 - Events
+    const HotelList(),        // Index 3 - Hotels (temporary replacement for Favorites)
+    const ProfileScreen(),    // Index 4 - Profile
+  ];
+
+  void _onTabTapped(int index) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final bool isProtectedRoute = index != 0; // Only home is public
+
+    if (isProtectedRoute && !authProvider.isAuthenticated) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      return;
+    }
+
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: greenColor,
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.greenAccent,
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
+        onTap: _onTabTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.explore_outlined), label: "Discover"),
-          BottomNavigationBarItem(icon: Icon(Icons.event_outlined), label: "Events"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border_outlined), label: "Favorites"),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined), 
+            label: "Home"
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore_outlined), 
+            label: "Discover"
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event_outlined), 
+            label: "Events"
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.hotel_outlined),  // Changed from favorites to hotels
+            label: "Hotels"
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline), 
+            label: "Profile"
+          ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Visit Addis",
-                      style: TextStyle(
-                        color: greenColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+    );
+  }
+}
+
+class HomeContent extends StatelessWidget {
+  const HomeContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Visit Addis",
+                    style: TextStyle(
+                      color: Colors.greenAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  Icon(Icons.notifications_none_outlined),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Greeting
+              const Text(
+                "Good Afternoon, Alex!",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              const Text("Explore the beauty of Addis Ababa"),
+              const SizedBox(height: 16),
+
+              // Search Bar
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.5),
+                            spreadRadius: 4,
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                      )],
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: "Search attractions",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
                       ),
                     ),
-                    Icon(Icons.notifications_none_outlined),
-                  ],
-                ),
-                SizedBox(height: 16),
-
-                // Greeting
-                Text(
-                  "Good Afternoon, Alex!",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text("Explore the beauty of Addis Ababa"),
-                SizedBox(height: 16),
-
-                // Search bar
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search for attractions, events, restaurants...",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
                   ),
-                ),
-                SizedBox(height: 24),
+                ],
+              ),
+              const SizedBox(height: 24),
 
-                // Featured section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Featured Section
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Featured",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("See All", style: TextStyle(color: Colors.greenAccent)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 180,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
                   children: [
-                    Text("Featured", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("See All", style: TextStyle(color: greenColor)),
+                    _buildFeaturedCard("National Museum", "Historical"),
+                    const SizedBox(width: 12),
+                    _buildFeaturedCard("Holy Trinity Cathedral", "Religious"),
                   ],
                 ),
-                SizedBox(height: 12),
-                SizedBox(
-                  height: 180,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _buildFeaturedCard("National Museum", "Historical"),
-                      SizedBox(width: 12),
-                      _buildFeaturedCard("Holy Trinity Cathedral", "Religious"),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24),
+              ),
+              const SizedBox(height: 24),
 
-                // Explore icons
-                Text("Explore", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildExploreIcon(Icons.location_on_outlined, "Attractions"),
-                    _buildExploreIcon(Icons.event_outlined, "Events"),
-                    _buildExploreIcon(Icons.restaurant_menu_outlined, "Restaurants"),
-                    _buildExploreIcon(Icons.favorite_border_outlined, "Favorites"),
-                  ],
-                ),
-                SizedBox(height: 24),
+              // Explore Section
+              const Text("Explore",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildExploreIcon(Icons.location_on_outlined, "Attractions", () {
+                    _navigateToScreen(context, const AttractionList());
+                  }),
+                  _buildExploreIcon(Icons.event_outlined, "Events", () {
+                    _navigateToScreen(context, const EventsScreen());
+                  }),
+                  _buildExploreIcon(Icons.hotel_outlined, "Hotels", () {
+                    _navigateToScreen(context, const HotelList());
+                  }),
+                ],
+              ),
+              const SizedBox(height: 24),
 
-                // Popular Near You section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Popular Near You", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("See All", style: TextStyle(color: greenColor)),
-                  ],
-                ),
-                SizedBox(height: 12),
-                _buildPopularCard("Tomoca Coffee", "Cafe", "1.2 km", 4.8),
-                _buildPopularCard("Red Terror Martyrs Memorial", "Museum", "2.5 km", 4.6),
-                _buildPopularCard("Addis Ababa Restaurant", "Traditional Food", "0.8 km", 4.7),
-              ],
-            ),
+              // Popular Near You Section
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Popular Near You",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("See All", style: TextStyle(color: Colors.greenAccent)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildPopularCard("Tomoca Coffee", "Cafe", "1.2 km", 4.8),
+              _buildPopularCard(
+                  "Red Terror Martyrs Memorial", "Museum", "2.5 km", 4.6),
+              _buildPopularCard(
+                  "Addis Ababa Restaurant", "Traditional Food", "0.8 km", 4.7),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFeaturedCard(String title, String category) {
+  void _navigateToScreen(BuildContext context, Widget screen) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isAuthenticated) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => screen),
+      );
+    }
+  }
+
+  static Widget _buildFeaturedCard(String title, String category) {
     return Container(
       width: 240,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        image: DecorationImage(
-          image: NetworkImage('https://placehold.co/600x400/png'), // Network placeholder
+        image: const DecorationImage(
+          image: NetworkImage('https://placehold.co/600x400/png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -150,15 +259,25 @@ class HomeScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                SizedBox(height: 4),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(category, style: TextStyle(color: Colors.white, fontSize: 12)),
+                  child: Text(
+                    category,
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -168,32 +287,36 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExploreIcon(IconData icon, String label) {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(12),
+  static Widget _buildExploreIcon(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.greenAccent, size: 30),
           ),
-          child: Icon(icon, color: Colors.green, size: 30),
-        ),
-        SizedBox(height: 8),
-        Text(label),
-      ],
+          const SizedBox(height: 8),
+          Text(label),
+        ],
+      ),
     );
   }
 
-  Widget _buildPopularCard(String name, String category, String distance, double rating) {
+  static Widget _buildPopularCard(
+      String name, String category, String distance, double rating) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Image.network(
-            'https://placehold.co/600x400/png', // Network placeholder
+            'https://placehold.co/600x400/png',
             width: 60,
             height: 60,
             fit: BoxFit.cover,
@@ -206,12 +329,13 @@ class HomeScreen extends StatelessWidget {
             Text(category),
             Row(
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 16),
-                SizedBox(width: 4),
+                const Icon(Icons.star, color: Colors.amber, size: 16),
+                const SizedBox(width: 4),
                 Text(rating.toString()),
-                SizedBox(width: 8),
-                Icon(Icons.location_on_outlined, color: Colors.grey, size: 16),
-                SizedBox(width: 4),
+                const SizedBox(width: 8),
+                const Icon(Icons.location_on_outlined,
+                    color: Colors.grey, size: 16),
+                const SizedBox(width: 4),
                 Text(distance),
               ],
             ),

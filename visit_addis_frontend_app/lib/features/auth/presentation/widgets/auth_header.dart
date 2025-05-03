@@ -6,13 +6,13 @@ class AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
         Text(
           'Visit Addis',
           style: AppStyles.titleStyle,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           'Discover the beauty of Ethiopia\'s capital',
           style: AppStyles.subtitleStyle,
@@ -20,4 +20,4 @@ class AuthHeader extends StatelessWidget {
       ],
     );
   }
-} 
+}

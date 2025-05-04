@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../data/models/user.dart';
 
-class ApiService {
+class APIService {
   final String baseUrl = 'https://visit-addis.onrender.com/api/v1/auth';
 
   Future<bool> registerUser(User user) async {

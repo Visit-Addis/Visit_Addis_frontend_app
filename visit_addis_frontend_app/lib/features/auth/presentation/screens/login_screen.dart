@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../bloc/login_bloc.dart';
-import '../../data/models/user.dart';
-import '../../data/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,7 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Dispatch login event
     context.read<LoginBloc>().add(LoginUserEvent(email, password));
   }
 
@@ -44,11 +42,18 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: BlocListener<LoginBloc, LoginState>(
             listener: (context, state) {
-              setState(() => _isLoading = state.isLoading); // Update loading state
+              if (state.isLoading) {
+                setState(() => _isLoading = true); // Start loading
+              } else {
+                setState(
+                    () => _isLoading = false);
+              }
 
               if (state.isLoggedIn) {
-                Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/home', (route) => false);
               }
+
               if (state.error != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -68,9 +73,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Icon(Icons.location_on, size: 72, color: Colors.green[800]),
                     const SizedBox(height: 24),
-                    Text('Welcome Back', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green[900])),
+                    Text('Welcome Back',
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[900])),
                     const SizedBox(height: 8),
-                    Text('Sign in to continue exploring Addis', style: TextStyle(fontSize: 14, color: Colors.green[700])),
+                    Text('Sign in to continue exploring Addis',
+                        style:
+                            TextStyle(fontSize: 14, color: Colors.green[700])),
                     const SizedBox(height: 32),
 
                     // Email Field
@@ -80,14 +91,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Email',
                         labelStyle: TextStyle(color: Colors.green[800]),
                         prefixIcon: Icon(Icons.email, color: Colors.green[600]),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         filled: true,
                         fillColor: Colors.white,
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter your email';
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Please enter a valid email';
+                        if (value == null || value.isEmpty)
+                          return 'Please enter your email';
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value))
+                          return 'Please enter a valid email';
                         return null;
                       },
                     ),
@@ -101,18 +116,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelStyle: TextStyle(color: Colors.green[800]),
                         prefixIcon: Icon(Icons.lock, color: Colors.green[600]),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.green[600]),
+                          icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.green[600]),
                           onPressed: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
+                            setState(
+                                () => _obscurePassword = !_obscurePassword);
                           },
                         ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         filled: true,
                         fillColor: Colors.white,
                       ),
                       obscureText: _obscurePassword,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter your password';
+                        if (value == null || value.isEmpty)
+                          return 'Please enter your password';
                         return null;
                       },
                     ),
@@ -121,10 +143,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Sign In Button
                     ElevatedButton(
                       onPressed: _isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green[600]),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green[600]),
                       child: _isLoading
                           ? const CircularProgressIndicator()
-                          : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          : const Text('Sign In',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 24),
 
@@ -132,12 +157,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Don't have an account?", style: TextStyle(color: Colors.green[800])),
+                        Text("Don't have an account?",
+                            style: TextStyle(color: Colors.green[800])),
                         TextButton(
                           onPressed: () {
                             Navigator.pushNamed(context, '/register');
                           },
-                          child: Text('Sign Up', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
+                          child: Text('Sign Up',
+                              style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -152,12 +181,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _translateError(String error) {
-    if (error.contains('user-not-found')) return 'No account found with this email';
-    if (error.contains('wrong-password')) return 'Incorrect password. Please try again';
-    if (error.contains('invalid-email')) return 'Please enter a valid email address';
-    if (error.contains('too-many-requests')) return 'Too many attempts. Account temporarily locked';
-    if (error.contains('network-request-failed')) return 'Network error. Please check your connection';
-    if (error.contains('user-disabled')) return 'This account has been disabled';
+    if (error.contains('user-not-found'))
+      return 'No account found with this email';
+    if (error.contains('wrong-password'))
+      return 'Incorrect password. Please try again';
+    if (error.contains('invalid-email'))
+      return 'Please enter a valid email address';
+    if (error.contains('too-many-requests'))
+      return 'Too many attempts. Account temporarily locked';
+    if (error.contains('network-request-failed'))
+      return 'Network error. Please check your connection';
+    if (error.contains('user-disabled'))
+      return 'This account has been disabled';
     return 'Login failed. Please try again';
   }
 }

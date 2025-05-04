@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+
+import '../../features/attraction/presentation/attraction_detail.dart';
+import '../../features/attraction/presentation/attraction_list.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/events/presentation/screens/event_details_screen.dart';
 import '../../features/events/presentation/screens/events_screen.dart';
-import '../features/attraction/presentation/attraction_detail.dart';
-import '../features/attraction/presentation/attraction_list.dart';
-import '../features/home/presentation/home_screen.dart';
-import '../features/hotels/presentation/pages/hotel_detail.dart';
-import '../features/hotels/presentation/pages/hotel_list.dart';
+import '../../features/home/presentation/home_screen.dart';
+import '../../features/hotels/presentation/pages/hotel_detail.dart';
+import '../../features/hotels/presentation/pages/hotel_list.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -29,7 +30,7 @@ class AppRoutes {
       case events:
         return MaterialPageRoute(builder: (_) => const EventsScreen());
       case home:
-        return MaterialPageRoute(builder: (_) =>  HomeScreen());
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
       case hotels:
         return MaterialPageRoute(builder: (_) => const HotelList());
       case hotelsDetails:
@@ -37,21 +38,28 @@ class AppRoutes {
         if (hotelId == null) {
           return _errorRoute('Hotel ID is required for details');
         }
-        return MaterialPageRoute(builder: (_) => HotelDetail()); //hotelId: hotelId later replace with HotelDetail(hotelId: hotelId)
+        return MaterialPageRoute(
+            builder: (_) => HotelDetail(hotelId:hotelId)); // Pass hotelId
       case attractions:
         return MaterialPageRoute(builder: (_) => const AttractionList());
-      case attractionsDetails:
+      
+       case attractionsDetails:
         final String? attractionId = settings.arguments as String?;
         if (attractionId == null) {
           return _errorRoute('Attraction ID is required for details');
         }
-        return MaterialPageRoute(builder: (_) => AttractionDetail()); //attractionId: attractionId replace it like above
+        return MaterialPageRoute(builder: (_) => AttractionDetail(attractionId: attractionId)); 
+
+
+
       case eventDetails:
         final String? eventId = settings.arguments as String?;
         if (eventId == null) {
           return _errorRoute('Event ID is required for details');
         }
-        return MaterialPageRoute(builder: (_) => EventDetailsScreen()); //eventId: eventId
+        return MaterialPageRoute(
+            builder: (_) =>
+                EventDetailsScreen()); // Pass eventId
       default:
         return _errorRoute('No route defined for ${settings.name}');
     }

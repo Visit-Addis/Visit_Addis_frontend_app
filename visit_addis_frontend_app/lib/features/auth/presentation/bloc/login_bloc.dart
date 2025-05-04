@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../data/services/auth_service.dart';
 
 // Events for Login
@@ -17,7 +18,11 @@ class LoginState {
   final bool isLoggedIn;
   final String? error;
 
-  LoginState({this.isLoading = false, this.isLoggedIn = false, this.error});
+  LoginState({
+    this.isLoading = false,
+    this.isLoggedIn = false,
+    this.error,
+  });
 }
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
@@ -28,9 +33,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginState(isLoading: true)); // Start loading
       try {
         await authService.login(event.email, event.password);
-        emit(LoginState(isLoggedIn: true)); // Emit success state
+        emit(LoginState(
+            isLoggedIn: true, isLoading: false)); // Emit success state
       } catch (e) {
-        emit(LoginState(error: e.toString())); // Emit error state
+        emit(LoginState(
+            isLoading: false, error: e.toString())); // Emit error state
+        print('error ${e.toString()}');
       }
     });
   }

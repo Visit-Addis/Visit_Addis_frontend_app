@@ -4,14 +4,14 @@ class User {
   final String password;
 
   User({
-    required this.userName, // Update constructor parameter
+    required this.userName,
     required this.email,
     required this.password,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'userName': userName, // Update the key here
+      'userName': userName,
       'email': email,
       'password': password,
     };
@@ -19,7 +19,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      userName: json['userName'], // Update to match the new key
+      userName: json['userName'],
       email: json['email'],
       password: json['password'],
     );

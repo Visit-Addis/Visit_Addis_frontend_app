@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:visit_addis_frontend_app/features/hotels/data/services/hotel_service.dart';
+import 'package:visit_addis_frontend_app/features/hotels/presentation/bloc/hotel_bloc.dart';
 
 import 'app/routes.dart';
-import 'features/auth/data/services/api_service.dart'; // Import your ApiService
-import 'features/auth/data/services/auth_service.dart'; // Import your AuthService
-import 'features/auth/presentation/bloc/login_bloc.dart'; // Import your LoginBloc
-import 'features/auth/presentation/bloc/register_bloc.dart'; // Import your RegistrationBloc
+import 'features/attraction/bloc/attraction_bloc.dart'; // Import your AttractionCubit
+import 'features/attraction/data/services/api_service.dart'; // Import ApiService
+import 'features/auth/data/services/api_service.dart';
+import 'features/auth/data/services/auth_service.dart';
+import 'features/auth/presentation/bloc/login_bloc.dart';
+import 'features/auth/presentation/bloc/register_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 
@@ -21,11 +25,18 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => LoginBloc(AuthService(ApiService())),
+          create: (context) => LoginBloc(AuthService(APIService())),
         ),
         BlocProvider(
-          create: (context) => RegistrationBloc(
-              AuthService(ApiService())), // Add RegistrationBloc here
+          create: (context) => RegistrationBloc(AuthService(APIService())),
+        ),
+        BlocProvider(
+          create: (context) =>
+              AttractionCubit(ApiService()), // Provide AttractionCubit here
+        ),
+        BlocProvider(
+          create: (context) =>
+              HotelCubit(HotelsApiService()), // Provide AttractionCubit here
         ),
       ],
       child: MaterialApp(

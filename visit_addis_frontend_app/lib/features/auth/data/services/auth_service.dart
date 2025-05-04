@@ -7,7 +7,7 @@ import '../../data/models/user.dart';
 import 'api_service.dart';
 
 class AuthService {
-  final ApiService apiService;
+  final APIService apiService;
 
   AuthService(this.apiService);
 

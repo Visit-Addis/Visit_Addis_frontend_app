@@ -1,44 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../data/models/hotels_model.dart'; // Import your Hotel model
+import '../bloc/hotel_bloc.dart'; // Import your HotelCubit
 
 class HotelDetail extends StatefulWidget {
-  const HotelDetail({super.key});
+  final String hotelId; // hotelId is a String
+
+  const HotelDetail({Key? key, required this.hotelId}) : super(key: key);
 
   @override
   State<HotelDetail> createState() => _HotelDetailState();
 }
 
 class _HotelDetailState extends State<HotelDetail> {
-  bool isFavorite = false;
-  List<dynamic> hotel = [
-    {
-      "image": 'images/hotel1.jpg',
-      "name": "Sky light hotel",
-      "description":
-          "Sky light hotel is one of the 5 stars hotel in Ethiopia and its awesome you should check it out.",
-      "rating": 5,
-      "location": "Gerji mebrat hayl",
-      "about":
-          "Lorem ipsum refers to placeholder text often used in publishing and graphic design to demonstrate the visual style of a document, webpage, or typeface.",
-    },
-  ];
-  List<String> foods = [
-    "images/food1.jpg",
-    "images/food2.jpg",
-    "images/food3.jpg",
-    "images/food4.jpg",
-  ];
+  Restaurant? _hotel; // State variable to hold the fetched hotel
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchHotelDetails(); // Fetch hotel details when the widget is initialized
+  }
+
+  Future<void> _fetchHotelDetails() async {
+    // Fetch hotel details using the hotelId
+    try {
+      final hotel = await context
+          .read<HotelCubit>()
+          .apiService
+          .fetchHotelById(widget.hotelId);
+      setState(() {
+        _hotel = hotel; // Update the state with the fetched hotel
+      });
+    } catch (e) {
+      // Handle error (e.g., display an error message)
+      print('Error fetching hotel details: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_hotel == null) {
+      // Display a loading indicator or an error message while fetching
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    bool isFavorite = false; // Manage favorite state
+    List<String> foods = [
+      "images/food1.jpg",
+      "images/food2.jpg",
+      "images/food3.jpg",
+      "images/food4.jpg",
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "${hotel[0]['name']} Hotel",
-          style: TextStyle(color: Colors.black),
+          _hotel!.name ?? 'No Name', // Provide a default value if name is null
+          style: const TextStyle(color: Colors.black),
         ),
       ),
       body: SingleChildScrollView(
-
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -48,19 +74,29 @@ class _HotelDetailState extends State<HotelDetail> {
               Stack(
                 alignment: Alignment.topRight,
                 children: [
-                  Image.asset(
-                    hotel[0]['image'],
-                    fit: BoxFit.cover,
-                    height: 250,
-                    width: double.infinity,
-                  ),
+                  if (_hotel!.images != null && _hotel!.images!.isNotEmpty)
+                    Image.network(
+                      _hotel!.images!.first.url, // Access the image URL directly
+                      fit: BoxFit.cover,
+                      height: 250,
+                      width: double.infinity,
+                    )
+                  else
+                    Container(
+                      height: 250,
+                      width: double.infinity,
+                      color: Colors.grey[300], // Placeholder color
+                      child: const Center(
+                        child: Text('No Image Available'),
+                      ),
+                    ),
                   Positioned(
                     left: 10,
                     top: 10,
                     child: Container(
-                      padding: EdgeInsets.all(3),
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
                             blurRadius: 4.0,
@@ -73,7 +109,7 @@ class _HotelDetailState extends State<HotelDetail> {
                         color: Colors.greenAccent,
                       ),
                       child: IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.arrow_back_ios_new,
                           size: 18,
                           color: Colors.white,
@@ -119,7 +155,7 @@ class _HotelDetailState extends State<HotelDetail> {
                         color: Colors.greenAccent,
                       ),
                       child: IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.download,
                           size: 20,
                           color: Colors.white,
@@ -134,41 +170,38 @@ class _HotelDetailState extends State<HotelDetail> {
               ),
               const SizedBox(height: 20),
               Text(
-                hotel[0]['name'],
-                style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                _hotel!.name ??
+                    'No Name', // Provide a default value if name is null
+                style:
+                    const TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.location_on),
-                  Text(" Location Address: ${hotel[0]['location']}"),
+                  const Icon(Icons.location_on),
+                  Text(
+                      " Location Address: ${_hotel!.location ?? 'No Location'}"), // Provide a default value if location is null
                 ],
               ),
-
-
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Icon(Icons.star_border),
-                  Text("${hotel[0]['rating']}, (120 reviews)"),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     const Icon(Icons.star_border),
+              //     // Text("${_hotel!.averageRating}, (120 reviews)"),
+              //   ],
+              // ),
+              const SizedBox(height: 20),
+              const Text("About",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const SizedBox(height: 20),
+              Text(_hotel!.description ??
+                  'No Description'), // Provide a default value if description is null
               const SizedBox(height: 20),
               Text(
-                "About",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              const SizedBox(height: 20),
-              Text(hotel[0]['about']),
-              const SizedBox(height: 20),
-              Text(
-                "Foods in ${hotel[0]['name']}",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+                  "Foods in ${_hotel!.name ?? 'This Restaurant'}", // Provide a default value if name is null
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-
               Container(
                 height: 120,
                 child: ListView.builder(
@@ -176,7 +209,7 @@ class _HotelDetailState extends State<HotelDetail> {
                   itemCount: foods.length,
                   itemBuilder: (context, index) {
                     return Container(
-                      margin: EdgeInsets.only(right: 10),
+                      margin: const EdgeInsets.only(right: 10),
                       child: Card(
                         child: Image.asset(
                           foods[index],
@@ -188,21 +221,16 @@ class _HotelDetailState extends State<HotelDetail> {
                   },
                 ),
               ),
-
-
               const SizedBox(height: 30),
               OutlinedButton(
                 style: ButtonStyle(
                   side: MaterialStateProperty.all(
-                    BorderSide(color: Colors.black),
-                  ),
-
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                  ),
+                      const BorderSide(color: Colors.black)),
+                  shape: MaterialStateProperty.all(const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero)),
                 ),
                 onPressed: () {},
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
                   children: [
@@ -211,30 +239,21 @@ class _HotelDetailState extends State<HotelDetail> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
               OutlinedButton(
                 style: ButtonStyle(
                   side: MaterialStateProperty.all(
-                    BorderSide(color: Colors.black),
-                  ),
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.zero,
-                    ),
-                  ),
+                      const BorderSide(color: Colors.black)),
+                  shape: MaterialStateProperty.all(const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero)),
                 ),
-
                 onPressed: () {},
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.language, color: Colors.black),
-                    Text(
-                      "Visit Website",
-                      style: TextStyle(color: Colors.black),
-                    ),
+                    Text("Visit Website",
+                        style: TextStyle(color: Colors.black)),
                   ],
                 ),
               ),

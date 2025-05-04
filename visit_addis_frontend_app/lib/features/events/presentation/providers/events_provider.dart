@@ -59,7 +59,7 @@ class EventsProvider with ChangeNotifier {
 
   Future<void> toggleBookmark(String eventId, BuildContext context) async {
     try {
-      await _eventService.toggleBookmark(eventId, context);
+      // await _eventService.toggleBookmark(eventId, context);
       
       // Update local state
       final index = _events.indexWhere((event) => event.id == eventId);
@@ -88,7 +88,7 @@ class EventsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _events = await _eventService.getBookmarkedEvents(context);
+      // _events = await _eventService.getBookmarkedEvents(context);
     } catch (e) {
       _error = e.toString();
     } finally {

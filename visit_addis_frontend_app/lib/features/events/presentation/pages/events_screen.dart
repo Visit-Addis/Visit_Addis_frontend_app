@@ -29,7 +29,7 @@ class EventsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  height: 48.0, // Added SizedBox to constrain TextField height
+                  height: 48.0,
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Search events...',

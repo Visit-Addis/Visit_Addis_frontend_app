@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:visit_addis_frontend_app/features/hotels/presentation/pages/hotel_list.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../features/hotels/presentation/pages/hotel_list.dart';
 import '../../../features/profile/presentation/pages/profile_screen.dart';
 import '../../attraction/presentation/attraction_list.dart';
-import '../../auth/presentation/providers/auth_provider.dart';
+import '../../auth/presentation/bloc/login_bloc.dart'; // Import your LoginBloc
 import '../../auth/presentation/screens/login_screen.dart';
 import '../../events/presentation/screens/events_screen.dart';
 
@@ -19,18 +19,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _children = [
-    const HomeContent(),      // Index 0 - Home
-    const AttractionList(),   // Index 1 - Discover
-    const EventsScreen(),     // Index 2 - Events
-    const HotelList(),        // Index 3 - Hotels (temporary replacement for Favorites)
-    const ProfileScreen(),    // Index 4 - Profile
+    const HomeContent(), // Index 0 - Home
+    const AttractionList(), // Index 1 - Discover
+    const EventsScreen(), // Index 2 - Events
+    const HotelList(), // Index 3 - Hotels
+    const ProfileScreen(), // Index 4 - Profile
   ];
 
   void _onTabTapped(int index) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final bool isProtectedRoute = index != 0; // Only home is public
 
-    if (isProtectedRoute && !authProvider.isAuthenticated) {
+    if (isProtectedRoute && !context.read<LoginBloc>().state.isLoggedIn) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -55,24 +54,24 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onTabTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined), 
-            label: "Home"
+            icon: Icon(Icons.home_outlined),
+            label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined), 
-            label: "Discover"
+            icon: Icon(Icons.explore_outlined),
+            label: "Discover",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.event_outlined), 
-            label: "Events"
+            icon: Icon(Icons.event_outlined),
+            label: "Events",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.hotel_outlined),  // Changed from favorites to hotels
-            label: "Hotels"
+            icon: Icon(Icons.hotel_outlined),
+            label: "Hotels",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline), 
-            label: "Profile"
+            icon: Icon(Icons.person_outline),
+            label: "Profile",
           ),
         ],
       ),
@@ -132,7 +131,8 @@ class HomeContent extends StatelessWidget {
                             spreadRadius: 4,
                             blurRadius: 6,
                             offset: const Offset(0, 3),
-                      )],
+                          ),
+                        ],
                       ),
                       child: TextFormField(
                         decoration: InputDecoration(
@@ -157,7 +157,8 @@ class HomeContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Featured",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   Text("See All", style: TextStyle(color: Colors.greenAccent)),
                 ],
               ),
@@ -182,7 +183,8 @@ class HomeContent extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildExploreIcon(Icons.location_on_outlined, "Attractions", () {
+                  _buildExploreIcon(Icons.location_on_outlined, "Attractions",
+                      () {
                     _navigateToScreen(context, const AttractionList());
                   }),
                   _buildExploreIcon(Icons.event_outlined, "Events", () {
@@ -200,7 +202,8 @@ class HomeContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Popular Near You",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   Text("See All", style: TextStyle(color: Colors.greenAccent)),
                 ],
               ),
@@ -218,8 +221,7 @@ class HomeContent extends StatelessWidget {
   }
 
   void _navigateToScreen(BuildContext context, Widget screen) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (!authProvider.isAuthenticated) {
+    if (!context.read<LoginBloc>().state.isLoggedIn) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -269,7 +271,8 @@ class HomeContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(8),
@@ -287,7 +290,8 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  static Widget _buildExploreIcon(IconData icon, String label, VoidCallback onTap) {
+  static Widget _buildExploreIcon(
+      IconData icon, String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Column(

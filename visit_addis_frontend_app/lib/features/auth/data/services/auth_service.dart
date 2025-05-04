@@ -1,73 +1,39 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../data/models/user.dart';
+import 'api_service.dart';
+
 class AuthService {
-  final String baseUrl = 'https://visit-addis-backend.onrender.com/api';
-  final http.Client _client = http.Client();
+  final ApiService apiService;
 
-  // Temporary mock data for testing
-  Future<String> login(String email, String password) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // Mock successful login
-    if (email == "test@example.com" && password == "password") {
-      return "mock_token_12345";
-    }
-    
-    try {
-      final response = await _client.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
-      );
+  AuthService(this.apiService);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['token'];
-      } else {
-        throw Exception('Invalid credentials');
-      }
-    } catch (e) {
-      // If API call fails, use mock data
-      if (email.isNotEmpty && password.isNotEmpty) {
-        return "mock_token_12345";
-      }
-      throw Exception('Please enter valid credentials');
-    }
+  Future<bool> register(User user) {
+    return apiService.registerUser(user);
   }
 
-  Future<String> register(String email, String password, String name) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // Mock successful registration
-    if (email.isNotEmpty && password.isNotEmpty && name.isNotEmpty) {
-      return "mock_token_12345";
-    }
+  Future<void> login(String email, String password) async {
+    const String baseUrl = 'https://visit-addis.onrender.com/api/v1/auth';
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email, 'password': password}),
+    );
 
-    try {
-      final response = await _client.post(
-        Uri.parse('$baseUrl/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-          'name': name,
-        }),
-      );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final token = data['token'];
 
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return data['token'];
-      } else {
-        throw Exception('Registration failed');
-      }
-    } catch (e) {
-      throw Exception('Please check your connection and try again');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', token);
+      print(data);
+      print(token);
+      return;
+    } else {
+      throw Exception('Login failed: ${response.body}');
     }
   }
-} 
+}

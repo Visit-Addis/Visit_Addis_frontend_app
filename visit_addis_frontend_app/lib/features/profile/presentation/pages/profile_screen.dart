@@ -1,13 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-
 import 'package:path/path.dart' as p;
 
 class TokenManager {
@@ -27,7 +23,6 @@ class TokenManager {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
   }
-
 }
 
 class FavoriteItem {
@@ -36,7 +31,7 @@ class FavoriteItem {
   final String category;
   final String imageUrl;
   final double averageRating;
-  final String type; // 'attraction', 'event', or 'restaurant'
+  final String type;
 
   FavoriteItem({
     required this.id,
@@ -64,8 +59,6 @@ class FavoriteItem {
   }
 }
 
-
-
 class ImagePickerService {
   static Future<File?> pickImageFromGallery() async {
     final picker = ImagePicker();
@@ -73,9 +66,6 @@ class ImagePickerService {
     return pickedFile != null ? File(pickedFile.path) : null;
   }
 }
-
-
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -86,9 +76,9 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  // int _selectedIndex = 4; // Profile tab selected by default
   Color greenColor = Colors.green;
   File? _profileImage;
+  String? _profileImageUrl;
   String userName = '';
   String email = '';
   List<FavoriteItem> favorites = [];
@@ -99,15 +89,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _tabController = TabController(length: 3, vsync: this);
     _fetchProfile();
   }
-
-  Future<void> _storeAuthTokenManually() async {
-  const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ODE2NDc2NDIwOTY0YzE2NWEwMmM4ODAiLCJyb2xlIjoidXNlciIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NDYzNTMyOTMsImV4cCI6MTc0NjM1NDE5M30.WX0ht7q8ntfeIqEag2-UVhUIVu2bOuCGvf9SyDcgUT8'; // Replace with your actual token
-  await TokenManager.saveToken(testToken);
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Auth token saved successfully!')),
-  );
-}
-
 
   Future<void> _fetchProfile() async {
     final token = await TokenManager.getToken();
@@ -123,11 +104,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       setState(() {
         userName = data['userName'] ?? '';
         email = data['email'] ?? '';
+        _profileImageUrl = data['images'] != null && data['images'].isNotEmpty
+            ? data['images'][0]['url']
+            : null;
       });
 
       // Fetch favorites
       List<FavoriteItem> fetchedFavorites = [];
-
       for (String type in ['attractions', 'events', 'restaurants']) {
         List ids = data['favorite'][type];
         for (String id in ids) {
@@ -142,7 +125,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         favorites = fetchedFavorites;
       });
     } else {
-      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load profile data. Status: ${response.statusCode}')),
+      );
     }
   }
 
@@ -162,7 +147,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   void _logout() async {
     await TokenManager.clearToken();
-    // Navigate to login screen or show a message
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logged out')));
   }
 
@@ -171,8 +155,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     if (image != null) {
       setState(() {
         _profileImage = image;
+        print(_profileImage);
+        _profileImageUrl = null;
       });
-      // Optionally, upload the image to the server here
     }
   }
 
@@ -200,19 +185,21 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
       body: Column(
         children: [
-           ElevatedButton(
-          onPressed: _storeAuthTokenManually, // Call the method here
-          child: const Text('Store Auth Token'),
-        ),
           SizedBox(height: 20),
           Stack(
             children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.grey[300],
-                backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
-                child: _profileImage == null ? Icon(Icons.person, size: 50, color: greenColor) : null,
-              ),
+CircleAvatar(
+  radius: 50,
+  backgroundColor: Colors.grey[300],
+  backgroundImage: _profileImage != null
+      ? FileImage(_profileImage!) as ImageProvider<Object>?
+      : (_profileImageUrl != null
+          ? NetworkImage(_profileImageUrl!) as ImageProvider<Object>?
+          : null), // Default to no image
+  child: (_profileImage == null && _profileImageUrl == null)
+      ? Icon(Icons.person, size: 50, color: greenColor)
+      : null,
+),
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -389,6 +376,39 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
     }
   }
+  @override
+void initState() {
+  super.initState();
+  _loadProfileData(); // Fetch and set the old email and name
+}
+
+Future<void> _loadProfileData() async {
+  final token = await SharedPreferences.getInstance().then((prefs) => prefs.getString('auth_token'));
+
+  if (token == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Auth token not found. Please log in again.')),
+    );
+    return;
+  }
+
+  final response = await http.get(
+    Uri.parse('https://visit-addis.onrender.com/api/v1/profile'),
+    headers: {'Authorization': 'Bearer $token'},
+  );
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    setState(() {
+      _nameController.text = data['userName'] ?? ''; // Set the old name
+      _emailController.text = data['email'] ?? '';   // Set the old email
+    });
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to load profile data. Status: ${response.statusCode}')),
+    );
+  }
+}
 
   Future<void> _updateProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -430,12 +450,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _nameController.text = "Enter your name";   // Placeholder
-    _emailController.text = "Enter your email"; // Placeholder
-  }
+
 
   @override
   void dispose() {
@@ -494,4 +509,3 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
-

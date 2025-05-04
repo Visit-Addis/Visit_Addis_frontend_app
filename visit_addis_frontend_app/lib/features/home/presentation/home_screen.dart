@@ -7,7 +7,9 @@ import '../../../features/profile/presentation/pages/profile_screen.dart';
 import '../../attraction/presentation/attraction_list.dart';
 import '../../auth/presentation/bloc/login_bloc.dart'; // Import your LoginBloc
 import '../../auth/presentation/screens/login_screen.dart';
-import '../../events/presentation/screens/events_screen.dart';
+// import '../../events/presentation/screens/events_screen.dart';
+import 'package:visit_addis_frontend_app/features/events/presentation/pages/event_list.dart';
+
 
 
 
@@ -58,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Widget> _children = [
     HomeContent(userName: userName), // Index 0 - Home
     const AttractionList(), // Index 1 - Discover
-    const EventsScreen(), // Index 2 - Events
+    const EventList(), // Index 2 - Events
     const HotelList(), // Index 3 - Hotels
     const ProfileScreen(), // Index 4 - Profile
   ];
@@ -210,9 +212,6 @@ FutureBuilder(
   },
 ),
 
-
-
-
               // Explore Section
               const Text("Explore",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -225,7 +224,7 @@ FutureBuilder(
                     _navigateToScreen(context, const AttractionList());
                   }),
                   _buildExploreIcon(Icons.event_outlined, "Events", () {
-                    _navigateToScreen(context, const EventsScreen());
+                    _navigateToScreen(context, const EventList());
                   }),
                   _buildExploreIcon(Icons.hotel_outlined, "Hotels", () {
                     _navigateToScreen(context, const HotelList());

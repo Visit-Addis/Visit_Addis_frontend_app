@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:visit_addis_frontend_app/features/events/data/services/event_service.dart';
 import 'package:visit_addis_frontend_app/features/hotels/data/services/hotel_service.dart';
 import 'package:visit_addis_frontend_app/features/hotels/presentation/bloc/hotel_bloc.dart';
+import 'package:visit_addis_frontend_app/features/events/presentation/bloc/event_bloc.dart';
 
 import 'app/routes.dart';
 import 'features/attraction/bloc/attraction_bloc.dart'; // Import your AttractionCubit
@@ -12,6 +14,8 @@ import 'features/auth/presentation/bloc/login_bloc.dart';
 import 'features/auth/presentation/bloc/register_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+
+
 
 void main() {
   runApp(const MyApp());
@@ -37,6 +41,10 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) =>
               HotelCubit(HotelsApiService()), // Provide AttractionCubit here
+        ),
+        BlocProvider(
+          create: (context) =>
+              EventCubit(EventsApiService()), // Provide AttractionCubit here
         ),
       ],
       child: MaterialApp(

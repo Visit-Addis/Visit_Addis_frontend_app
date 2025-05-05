@@ -1,10 +1,11 @@
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenManager {
   static const _tokenKey = 'auth_token';
@@ -74,7 +75,8 @@ class ProfileScreen extends StatefulWidget {
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Color greenColor = Colors.green;
   File? _profileImage;
@@ -126,12 +128,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load profile data. Status: ${response.statusCode}')),
+        SnackBar(
+            content: Text(
+                'Failed to load profile data. Status: ${response.statusCode}')),
       );
     }
   }
 
-  Future<FavoriteItem?> _fetchFavoriteItem(String type, String id, String token) async {
+  Future<FavoriteItem?> _fetchFavoriteItem(
+      String type, String id, String token) async {
     final response = await http.get(
       Uri.parse('https://visit-addis.onrender.com/api/v1/$type/$id'),
       headers: {'Authorization': 'Bearer $token'},
@@ -147,7 +152,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   void _logout() async {
     await TokenManager.clearToken();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logged out')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Logged out')));
   }
 
   void _pickProfileImage() async {
@@ -185,21 +191,22 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
       body: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Stack(
             children: [
-CircleAvatar(
-  radius: 50,
-  backgroundColor: Colors.grey[300],
-  backgroundImage: _profileImage != null
-      ? FileImage(_profileImage!) as ImageProvider<Object>?
-      : (_profileImageUrl != null
-          ? NetworkImage(_profileImageUrl!) as ImageProvider<Object>?
-          : null), // Default to no image
-  child: (_profileImage == null && _profileImageUrl == null)
-      ? Icon(Icons.person, size: 50, color: greenColor)
-      : null,
-),
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.grey[300],
+                backgroundImage: _profileImage != null
+                    ? FileImage(_profileImage!) as ImageProvider<Object>?
+                    : (_profileImageUrl != null
+                        ? NetworkImage(_profileImageUrl!)
+                            as ImageProvider<Object>?
+                        : null), // Default to no image
+                child: (_profileImage == null && _profileImageUrl == null)
+                    ? Icon(Icons.person, size: 50, color: greenColor)
+                    : null,
+              ),
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -208,23 +215,26 @@ CircleAvatar(
                   child: CircleAvatar(
                     radius: 16,
                     backgroundColor: greenColor,
-                    child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                    child: const Icon(Icons.camera_alt,
+                        size: 16, color: Colors.white),
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10),
-          Text(userName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-          SizedBox(height: 5),
-          Text(email, style: TextStyle(color: Colors.grey)),
-          SizedBox(height: 20),
+          const SizedBox(height: 10),
+          Text(userName,
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          const SizedBox(height: 5),
+          Text(email, style: const TextStyle(color: Colors.grey)),
+          const SizedBox(height: 20),
           TabBar(
             controller: _tabController,
             indicatorColor: greenColor,
             labelColor: greenColor,
             unselectedLabelColor: Colors.grey,
-            tabs: [
+            tabs: const [
               Tab(text: 'Favorites'),
               Tab(text: 'Edit Profile'),
               Tab(text: 'App Settings'),
@@ -246,32 +256,33 @@ CircleAvatar(
   }
 }
 
-
-
-
 class FavoritesTab extends StatelessWidget {
   final List<FavoriteItem> favorites;
   final Color greenColor;
 
-  const FavoritesTab({Key? key, required this.favorites, required this.greenColor}) : super(key: key);
+  const FavoritesTab(
+      {Key? key, required this.favorites, required this.greenColor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     if (favorites.isEmpty) {
-      return Center(child: Text('No favorites added.'));
+      return const Center(child: Text('No favorites added.'));
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       itemCount: favorites.length,
       itemBuilder: (context, index) {
         final item = favorites[index];
         return Card(
-          margin: EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.only(bottom: 16),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
             leading: item.imageUrl.isNotEmpty
-                ? Image.network(item.imageUrl, width: 50, height: 50, fit: BoxFit.cover)
+                ? Image.network(item.imageUrl,
+                    width: 50, height: 50, fit: BoxFit.cover)
                 : Container(
                     width: 50,
                     height: 50,
@@ -279,20 +290,22 @@ class FavoritesTab extends StatelessWidget {
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.image_outlined, color: Colors.grey),
+                    child: const Icon(Icons.image_outlined, color: Colors.grey),
                   ),
-            title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(item.name,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 4),
-                Text(item.category, style: TextStyle(color: Colors.grey)),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
+                Text(item.category, style: const TextStyle(color: Colors.grey)),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Icon(Icons.star, color: greenColor, size: 16),
-                    SizedBox(width: 4),
-                    Text('${item.averageRating} (${item.type})', style: TextStyle(color: greenColor)),
+                    const SizedBox(width: 4),
+                    Text('${item.averageRating} (${item.type})',
+                        style: TextStyle(color: greenColor)),
                   ],
                 ),
               ],
@@ -304,17 +317,11 @@ class FavoritesTab extends StatelessWidget {
   }
 }
 
-
-
-
-
-
-
-
 class AppSettingsScreen extends StatelessWidget {
   final Color greenColor;
 
-  const AppSettingsScreen({Key? key, required this.greenColor}) : super(key: key);
+  const AppSettingsScreen({Key? key, required this.greenColor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -323,23 +330,23 @@ class AppSettingsScreen extends StatelessWidget {
       children: [
         ListTile(
           leading: Icon(Icons.notifications, color: greenColor),
-          title: Text('Notifications'),
+          title: const Text('Notifications'),
           trailing: Switch(value: true, onChanged: (val) {}),
         ),
-        Divider(),
+        const Divider(),
         ListTile(
           leading: Icon(Icons.language, color: greenColor),
-          title: Text('Language'),
-          trailing: Text('English'),
+          title: const Text('Language'),
+          trailing: const Text('English'),
           onTap: () {
             // Implement language picker
           },
         ),
-        Divider(),
+        const Divider(),
         ListTile(
           leading: Icon(Icons.color_lens, color: greenColor),
-          title: Text('Theme'),
-          trailing: Text('Light'),
+          title: const Text('Theme'),
+          trailing: const Text('Light'),
           onTap: () {
             // Implement theme picker
           },
@@ -348,10 +355,6 @@ class AppSettingsScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
 
 class EditProfileScreen extends StatefulWidget {
   final Color greenColor;
@@ -369,46 +372,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isLoading = false;
 
   Future<void> _pickImageFromGallery() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
     }
   }
+
   @override
-void initState() {
-  super.initState();
-  _loadProfileData(); // Fetch and set the old email and name
-}
-
-Future<void> _loadProfileData() async {
-  final token = await SharedPreferences.getInstance().then((prefs) => prefs.getString('auth_token'));
-
-  if (token == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Auth token not found. Please log in again.')),
-    );
-    return;
+  void initState() {
+    super.initState();
+    _loadProfileData(); // Fetch and set the old email and name
   }
 
-  final response = await http.get(
-    Uri.parse('https://visit-addis.onrender.com/api/v1/profile'),
-    headers: {'Authorization': 'Bearer $token'},
-  );
+  Future<void> _loadProfileData() async {
+    final token = await SharedPreferences.getInstance()
+        .then((prefs) => prefs.getString('auth_token'));
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    setState(() {
-      _nameController.text = data['userName'] ?? ''; // Set the old name
-      _emailController.text = data['email'] ?? '';   // Set the old email
-    });
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to load profile data. Status: ${response.statusCode}')),
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Auth token not found. Please log in again.')),
+      );
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('https://visit-addis.onrender.com/api/v1/profile'),
+      headers: {'Authorization': 'Bearer $token'},
     );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _nameController.text = data['userName'] ?? ''; // Set the old name
+        _emailController.text = data['email'] ?? ''; // Set the old email
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Failed to load profile data. Status: ${response.statusCode}')),
+      );
+    }
   }
-}
 
   Future<void> _updateProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -416,7 +425,8 @@ Future<void> _loadProfileData() async {
 
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Auth token not found. Please log in again.')),
+        const SnackBar(
+            content: Text('Auth token not found. Please log in again.')),
       );
       return;
     }
@@ -445,12 +455,12 @@ Future<void> _loadProfileData() async {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile. Status: ${response.statusCode}')),
+        SnackBar(
+            content: Text(
+                'Failed to update profile. Status: ${response.statusCode}')),
       );
     }
   }
-
-
 
   @override
   void dispose() {
@@ -468,42 +478,46 @@ Future<void> _loadProfileData() async {
       //   title: const Text('Edit Profile'),
       //   backgroundColor: greenColor,
       // ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _pickImageFromGallery,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage:
-                    _selectedImage != null ? FileImage(_selectedImage!) : null,
-                child: _selectedImage == null
-                    ? const Icon(Icons.camera_alt, size: 40, color: Colors.white)
-                    : null,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _pickImageFromGallery,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.grey.shade300,
+                  backgroundImage: _selectedImage != null
+                      ? FileImage(_selectedImage!)
+                      : null,
+                  child: _selectedImage == null
+                      ? const Icon(Icons.camera_alt,
+                          size: 40, color: Colors.white)
+                      : null,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _updateProfile,
-              style: ElevatedButton.styleFrom(backgroundColor: greenColor),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Save'),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _updateProfile,
+                style: ElevatedButton.styleFrom(backgroundColor: greenColor),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Save'),
+              ),
+            ],
+          ),
         ),
       ),
     );

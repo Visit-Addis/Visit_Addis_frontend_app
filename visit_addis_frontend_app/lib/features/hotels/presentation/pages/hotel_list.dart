@@ -226,7 +226,7 @@ class _HotelListState extends State<HotelList> {
                                       'No Name', // Provide a default value
                                   style: const TextStyle(
                                     fontSize: 20,
-                                    fontWeight: FontWeight.normal,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -236,21 +236,34 @@ class _HotelListState extends State<HotelList> {
                                   hotel.description ??
                                       'No Description', // Provide a default value
                                   style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+
+                              Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  'location : ${hotel.location}' ??
+                                      'No location',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+
+                              const Padding(
+                                padding: EdgeInsets.all(6),
+                                child: Text(
+                                  "Rating: 4 ⭐",
+                                  style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.normal,
                                   ),
                                 ),
                               ),
-                              // Padding(
-                              //   padding: const EdgeInsets.all(6),
-                              //   child: Text(
-                              //     "Rating: ${hotel.averageRating} ⭐", // Assuming rating is a field in your Restaurant model
-                              //     style: const TextStyle(
-                              //       fontSize: 20,
-                              //       fontWeight: FontWeight.normal,
-                              //     ),
-                              //   ),
-                              // ),
                             ],
                           ),
                         ),

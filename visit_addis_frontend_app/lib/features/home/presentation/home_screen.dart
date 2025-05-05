@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:visit_addis_frontend_app/features/home/data/services/home_api_service.dart';
 
 import '../../../features/hotels/presentation/pages/hotel_list.dart';
 import '../../../features/profile/presentation/pages/profile_screen.dart';
 import '../../attraction/presentation/attraction_list.dart';
 import '../../auth/presentation/bloc/login_bloc.dart'; // Import your LoginBloc
 import '../../auth/presentation/screens/login_screen.dart';
-import '../../events/presentation/screens/events_screen.dart';
+// import '../../events/presentation/screens/events_screen.dart';
+import 'package:visit_addis_frontend_app/features/events/presentation/pages/event_list.dart';
+
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,15 +21,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final fetchedUserName = await HomeApiService().fetchUserName();
+    setState(() {
+      userName = fetchedUserName ?? 'Guest'; // Fallback to 'Guest' if username is null
+    });
+  }
   int _currentIndex = 0;
 
-  final List<Widget> _children = [
-    const HomeContent(), // Index 0 - Home
-    const AttractionList(), // Index 1 - Discover
-    const EventsScreen(), // Index 2 - Events
-    const HotelList(), // Index 3 - Hotels
-    const ProfileScreen(), // Index 4 - Profile
-  ];
+
 
   void _onTabTapped(int index) {
     final bool isProtectedRoute = index != 0; // Only home is public
@@ -44,6 +57,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _children = [
+    HomeContent(userName: userName), // Index 0 - Home
+    const AttractionList(), // Index 1 - Discover
+    const EventList(), // Index 2 - Events
+    const HotelList(), // Index 3 - Hotels
+    const ProfileScreen(), // Index 4 - Profile
+  ];
     return Scaffold(
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -80,8 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
-
+  final String userName; 
+  const HomeContent({super.key, required this.userName} );
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -109,8 +129,8 @@ class HomeContent extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Greeting
-              const Text(
-                "Good Afternoon, Alex!",
+              Text(
+                "Good Afternoon, $userName!",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
@@ -152,29 +172,45 @@ class HomeContent extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Featured Section
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Featured",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("See All", style: TextStyle(color: Colors.greenAccent)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 180,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildFeaturedCard("National Museum", "Historical"),
-                    const SizedBox(width: 12),
-                    _buildFeaturedCard("Holy Trinity Cathedral", "Religious"),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+// Featured Section
+const Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Text("Featured",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+    Text("See All", style: TextStyle(color: Colors.greenAccent)),
+  ],
+),
+const SizedBox(height: 12),
+
+FutureBuilder(
+  future: HomeApiService.fetchFeaturedAttractions(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      return const Center(child: Text("Failed to load featured attractions"));
+    } else {
+      final attractions = snapshot.data!;
+      return SizedBox(
+        height: 180,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: attractions.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (context, index) {
+            final attraction = attractions[index];
+            return _buildFeaturedCard(
+              attraction.name,
+              attraction.category,
+              attraction.imageUrl,
+            );
+          },
+        ),
+      );
+    }
+  },
+),
 
               // Explore Section
               const Text("Explore",
@@ -188,7 +224,7 @@ class HomeContent extends StatelessWidget {
                     _navigateToScreen(context, const AttractionList());
                   }),
                   _buildExploreIcon(Icons.event_outlined, "Events", () {
-                    _navigateToScreen(context, const EventsScreen());
+                    _navigateToScreen(context, const EventList());
                   }),
                   _buildExploreIcon(Icons.hotel_outlined, "Hotels", () {
                     _navigateToScreen(context, const HotelList());
@@ -208,11 +244,36 @@ class HomeContent extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              _buildPopularCard("Tomoca Coffee", "Cafe", "1.2 km", 4.8),
-              _buildPopularCard(
-                  "Red Terror Martyrs Memorial", "Museum", "2.5 km", 4.6),
-              _buildPopularCard(
-                  "Addis Ababa Restaurant", "Traditional Food", "0.8 km", 4.7),
+
+
+FutureBuilder<List<Map<String, dynamic>>>(
+
+  future: HomeApiService().getPopularRestaurants(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    } else {
+      final restaurants = snapshot.data!;
+      return SingleChildScrollView(
+        child: Column(
+          children: restaurants.map((restaurant) {
+            return _buildPopularCard(
+              name: restaurant['name'],
+              category: restaurant['category'],
+              distance: restaurant['location'], 
+              imageUrl: restaurant['imageUrl'] ?? '',
+              rating: (restaurant['rating'] as num).toDouble(),
+            );
+          }).toList(),
+        ),
+      );
+    }
+  },
+),
+
+
             ],
           ),
         ),
@@ -234,61 +295,63 @@ class HomeContent extends StatelessWidget {
     }
   }
 
-  static Widget _buildFeaturedCard(String title, String category) {
-    return Container(
-      width: 240,
+static Widget _buildFeaturedCard(String title, String category, String? imageUrl) {
+  return Container(
+    width: 240,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      image: DecorationImage(
+        image: NetworkImage(
+          imageUrl ?? 'https://placehold.co/600x400/png',
+        ),
+        fit: BoxFit.cover,
+      ),
+    ),
+    child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        image: const DecorationImage(
-          image: NetworkImage('https://placehold.co/600x400/png'),
-          fit: BoxFit.cover,
+        gradient: LinearGradient(
+          colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
         ),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [Colors.black.withOpacity(0.7), Colors.transparent],
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-                const SizedBox(height: 4),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    category,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
+                child: Text(
+                  category,
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   static Widget _buildExploreIcon(
       IconData icon, String label, VoidCallback onTap) {
@@ -311,41 +374,69 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  static Widget _buildPopularCard(
-      String name, String category, String distance, double rating) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+
+
+ 
+static Widget _buildPopularCard({
+  required String name,
+  required String category,
+  required String distance,
+  required double rating,
+  required String imageUrl,
+}) {
+  return Container(
+    width: double.infinity, // Ensure the card takes up the full width of its parent
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Card(
       elevation: 2,
-      child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            'https://placehold.co/600x400/png',
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600), // Add width constraints
+        child: ListTile(
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              imageUrl.isNotEmpty
+                  ? imageUrl
+                  : 'https://placehold.co/600x400/png',
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+            ),
+          ),
+          title: Text(name),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(category),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  ...List.generate(5, (index) {
+                    return Icon(
+                      index < rating.floor()
+                          ? Icons.star
+                          : index < rating
+                              ? Icons.star_half
+                              : Icons.star_border,
+                      color: Colors.amber,
+                      size: 16,
+                    );
+                  }),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.location_on_outlined,
+                      color: Colors.grey, size: 16),
+                  const SizedBox(width: 4),
+                  Text(distance),
+                ],
+              ),
+            ],
           ),
         ),
-        title: Text(name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(category),
-            Row(
-              children: [
-                const Icon(Icons.star, color: Colors.amber, size: 16),
-                const SizedBox(width: 4),
-                Text(rating.toString()),
-                const SizedBox(width: 8),
-                const Icon(Icons.location_on_outlined,
-                    color: Colors.grey, size: 16),
-                const SizedBox(width: 4),
-                Text(distance),
-              ],
-            ),
-          ],
-        ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 }

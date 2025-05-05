@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) =>
-              AttractionCubit(ApiService()), // Provide AttractionCubit here
+              AttractionCubit(ApiService()),
         ),
         BlocProvider(
           create: (context) =>

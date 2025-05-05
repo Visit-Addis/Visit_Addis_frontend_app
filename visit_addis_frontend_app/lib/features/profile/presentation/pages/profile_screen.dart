@@ -317,14 +317,51 @@ class FavoritesTab extends StatelessWidget {
   }
 }
 
-class AppSettingsScreen extends StatelessWidget {
+class AppSettingsScreen extends StatefulWidget {
   final Color greenColor;
 
   const AppSettingsScreen({Key? key, required this.greenColor})
       : super(key: key);
 
   @override
+  State<AppSettingsScreen> createState() => _AppSettingsScreenState();
+}
+
+class _AppSettingsScreenState extends State<AppSettingsScreen> {
+  late ThemeMode _themeMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeString = prefs.getString('themeMode') ?? 'system';
+    setState(() {
+      _themeMode = ThemeMode.values.byName(themeString);
+    });
+  }
+
+  Future<void> _saveThemeMode(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('themeMode', mode.name);
+  }
+
+  void _setTheme(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+    _saveThemeMode(mode);
+    // Notify the app to rebuild with the new theme
+    MyApp.of(context)?.changeTheme(mode);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final greenColor = widget.greenColor;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -346,12 +383,95 @@ class AppSettingsScreen extends StatelessWidget {
         ListTile(
           leading: Icon(Icons.color_lens, color: greenColor),
           title: const Text('Theme'),
-          trailing: const Text('Light'),
-          onTap: () {
-            // Implement theme picker
-          },
+          trailing: DropdownButton<ThemeMode>(
+            value: _themeMode,
+            items: const [
+              DropdownMenuItem(
+                value: ThemeMode.system,
+                child: Text('System'),
+              ),
+              DropdownMenuItem(
+                value: ThemeMode.light,
+                child: Text('Light'),
+              ),
+              DropdownMenuItem(
+                value: ThemeMode.dark,
+                child: Text('Dark'),
+              ),
+            ],
+            onChanged: (mode) {
+              if (mode != null) {
+                _setTheme(mode);
+              }
+            },
+          ),
         ),
       ],
+    );
+  }
+}
+
+// Create a way to access and change the theme
+class MyApp extends StatefulWidget {
+  final Widget home;
+
+  const MyApp({Key? key, required this.home}) : super(key: key);
+
+  static _MyAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>();
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeString = prefs.getString('themeMode') ?? 'system';
+    setState(() {
+      _themeMode = ThemeMode.values.byName(themeString);
+    });
+  }
+
+  void changeTheme(ThemeMode themeMode) {
+    setState(() {
+      _themeMode = themeMode;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Visit Addis',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.green,
+        brightness: Brightness.dark,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black87, // Dark app bar color
+        ),
+        scaffoldBackgroundColor:
+            Colors.black, // Dark background for the scaffold
+        cardColor: Colors.grey.shade900, // Dark card color
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      themeMode: _themeMode,
+      home: widget.home,
     );
   }
 }

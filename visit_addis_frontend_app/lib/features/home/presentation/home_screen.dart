@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import '../../events/presentation/screens/events_screen.dart';
 import 'package:visit_addis_frontend_app/features/events/presentation/pages/event_list.dart';
 import 'package:visit_addis_frontend_app/features/home/data/services/home_api_service.dart';
 
 import '../../../features/hotels/presentation/pages/hotel_list.dart';
-import '../../../features/profile/presentation/pages/profile_screen.dart';
+import '../../../features/profile/presentation/pages/profile_screen.dart'; // Correct import
 import '../../attraction/presentation/attraction_list.dart';
-import '../../auth/presentation/bloc/login_bloc.dart'; // Import your LoginBloc
+import '../../auth/presentation/bloc/login_bloc.dart';
 import '../../auth/presentation/screens/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -54,6 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryGreen = const Color(0xFF00A368); // Your primary green
+    final Color lightGreen = const Color(0xFFC8E6C9); // Even lighter green
+
     final List<Widget> _children = [
       HomeContent(userName: userName), // Index 0 - Home
       const AttractionList(), // Index 1 - Discover
@@ -65,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.greenAccent,
+        selectedItemColor: primaryGreen, // Use primary green
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
         onTap: _onTabTapped,
@@ -101,175 +103,203 @@ class HomeContent extends StatelessWidget {
   const HomeContent({super.key, required this.userName});
   @override
   Widget build(BuildContext context) {
+    final Color primaryGreen = const Color(0xFF00A368); // Your primary green
+    final Color lightGreen = const Color(0xFFC8E6C9); // Even lighter green
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent, // Make AppBar transparent
+          elevation: 0, // Remove shadow
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  primaryGreen.withOpacity(0.8),
+                  lightGreen.withOpacity(0.6)
+                ], // Gradient from primary to light green
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Header
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Visit Addis",
-                    style: TextStyle(
-                      color: Colors.greenAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  Icon(Icons.notifications_none_outlined),
-                ],
+              const Text(
+                "Visit Addis",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
-              const SizedBox(height: 16),
-
-              // Greeting
-              Text(
-                "Good Afternoon, $userName!",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              const Text("Explore the beauty of Addis Ababa"),
-              const SizedBox(height: 16),
-
-              // Search Bar
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withOpacity(0.5),
-                            spreadRadius: 4,
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: "Search attractions",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide.none,
-                          ),
-                          prefixIcon: const Icon(Icons.search),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-// Featured Section
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Featured",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("See All", style: TextStyle(color: Colors.greenAccent)),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              FutureBuilder(
-                future: HomeApiService.fetchFeaturedAttractions(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(
-                        child: Text("Failed to load featured attractions"));
-                  } else {
-                    final attractions = snapshot.data!;
-                    return SizedBox(
-                      height: 180,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: attractions.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final attraction = attractions[index];
-                          return _buildFeaturedCard(
-                            attraction.name,
-                            attraction.category,
-                            attraction.imageUrl,
-                          );
-                        },
-                      ),
-                    );
-                  }
-                },
-              ),
-
-              // Explore Section
-              const Text("Explore",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildExploreIcon(Icons.location_on_outlined, "Attractions",
-                      () {
-                    _navigateToScreen(context, const AttractionList());
-                  }),
-                  _buildExploreIcon(Icons.event_outlined, "Events", () {
-                    _navigateToScreen(context, const EventList());
-                  }),
-                  _buildExploreIcon(Icons.hotel_outlined, "Hotels", () {
-                    _navigateToScreen(context, const HotelList());
-                  }),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Popular Near You Section
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Popular Near You",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("See All", style: TextStyle(color: Colors.greenAccent)),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: HomeApiService().getPopularRestaurants(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    final restaurants = snapshot.data!;
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: restaurants.map((restaurant) {
-                          return _buildPopularCard(
-                            name: restaurant['name'],
-                            category: restaurant['category'],
-                            distance: restaurant['location'],
-                            imageUrl: restaurant['imageUrl'] ?? '',
-                            rating: (restaurant['rating'] as num).toDouble(),
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  }
+              IconButton(
+                icon: const Icon(Icons.notifications_none_outlined,
+                    color: Colors.white),
+                onPressed: () {
+                  // Handle notification tap
                 },
               ),
             ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Greeting
+                Text(
+                  "Good Afternoon, $userName!",
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                const Text("Explore the beauty of Addis Ababa"),
+                const SizedBox(height: 16),
+
+                // Search Bar
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primaryGreen.withOpacity(0.5),
+                              spreadRadius: 4,
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            labelText: "Search attractions",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            prefixIcon: const Icon(Icons.search),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Featured Section
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Featured",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text("See All",
+                        style: TextStyle(color: Colors.greenAccent)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                FutureBuilder(
+                  future: HomeApiService.fetchFeaturedAttractions(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                          child: Text("Failed to load featured attractions"));
+                    } else {
+                      final attractions = snapshot.data!;
+                      return SizedBox(
+                        height: 180,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: attractions.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final attraction = attractions[index];
+                            return _buildFeaturedCard(
+                              attraction.name,
+                              attraction.category,
+                              attraction.imageUrl,
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  },
+                ),
+
+                // Explore Section
+                const Text("Explore",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildExploreIcon(Icons.location_on_outlined, "Attractions",
+                        () {
+                      _navigateToScreen(context, const AttractionList());
+                    }),
+                    _buildExploreIcon(Icons.event_outlined, "Events", () {
+                      _navigateToScreen(context, const EventList());
+                    }),
+                    _buildExploreIcon(Icons.hotel_outlined, "Hotels", () {
+                      _navigateToScreen(context, const HotelList());
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Popular Near You Section
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Popular Near You",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text("See All",
+                        style: TextStyle(color: Colors.greenAccent)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: HomeApiService().getPopularRestaurants(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      final restaurants = snapshot.data!;
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: restaurants.map((restaurant) {
+                            return _buildPopularCard(
+                              name: restaurant['name'],
+                              category: restaurant['category'],
+                              distance: restaurant['location'],
+                              imageUrl: restaurant['imageUrl'] ?? '',
+                              rating: (restaurant['rating'] as num).toDouble(),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/hotels_model.dart'; // Import your Hotel model
 import '../bloc/hotel_bloc.dart'; // Import your HotelCubit
@@ -60,7 +61,7 @@ class _HotelDetailState extends State<HotelDetail> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _hotel!.name ?? 'No Name', // Provide a default value if name is null
+          _hotel!.name ?? 'No Name',
           style: const TextStyle(color: Colors.black),
         ),
       ),
@@ -76,7 +77,7 @@ class _HotelDetailState extends State<HotelDetail> {
                 children: [
                   if (_hotel!.images != null && _hotel!.images!.isNotEmpty)
                     Image.network(
-                      _hotel!.images!.first.url, // Access the image URL directly
+                      _hotel!.images!.first.url,
                       fit: BoxFit.cover,
                       height: 250,
                       width: double.infinity,
@@ -85,7 +86,7 @@ class _HotelDetailState extends State<HotelDetail> {
                     Container(
                       height: 250,
                       width: double.infinity,
-                      color: Colors.grey[300], // Placeholder color
+                      color: Colors.grey[300],
                       child: const Center(
                         child: Text('No Image Available'),
                       ),
@@ -145,27 +146,27 @@ class _HotelDetailState extends State<HotelDetail> {
                       ),
                     ),
                   ),
-                  Positioned(
-                    right: 60,
-                    top: 10,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 3),
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.greenAccent,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.download,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          print('Download clicked');
-                        },
-                      ),
-                    ),
-                  ),
+                  // Positioned(
+                  //   right: 60,
+                  //   top: 10,
+                  //   child: Container(
+                  //     decoration: BoxDecoration(
+                  //       border: Border.all(color: Colors.white, width: 3),
+                  //       borderRadius: BorderRadius.circular(8),
+                  //       color: Colors.greenAccent,
+                  //     ),
+                  //     child: IconButton(
+                  //       icon: const Icon(
+                  //         Icons.download,
+                  //         size: 20,
+                  //         color: Colors.white,
+                  //       ),
+                  //       onPressed: () {
+                  //         print('Download clicked');
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -225,16 +226,41 @@ class _HotelDetailState extends State<HotelDetail> {
               OutlinedButton(
                 style: ButtonStyle(
                   side: MaterialStateProperty.all(
-                      const BorderSide(color: Colors.black)),
-                  shape: MaterialStateProperty.all(const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero)),
+                    const BorderSide(color: Colors.black),
+                  ),
+                  shape: MaterialStateProperty.all(
+                    const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                  padding: MaterialStateProperty.all(
+                    const EdgeInsets.symmetric(vertical: 15),
+                  ),
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  const phoneNumber =
+                      '+1234567890'; // Hardcoded placeholder number
+                  final url = 'tel:$phoneNumber'; // Creates a tel: link
+
+                  try {
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Could not launch phone call')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
                   children: [
                     Icon(Icons.call_outlined, color: Colors.black),
+                    SizedBox(width: 8),
                     Text("Call Venue", style: TextStyle(color: Colors.black)),
                   ],
                 ),
@@ -243,15 +269,36 @@ class _HotelDetailState extends State<HotelDetail> {
               OutlinedButton(
                 style: ButtonStyle(
                   side: MaterialStateProperty.all(
-                      const BorderSide(color: Colors.black)),
-                  shape: MaterialStateProperty.all(const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero)),
+                    const BorderSide(color: Colors.black),
+                  ),
+                  shape: MaterialStateProperty.all(
+                    const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  const url =
+                      'https://www.example.com'; // Hardcoded placeholder URL
+                  try {
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Could not open $url')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.language, color: Colors.black),
+                    SizedBox(width: 8), // Adds spacing between icon and text
                     Text("Visit Website",
                         style: TextStyle(color: Colors.black)),
                   ],

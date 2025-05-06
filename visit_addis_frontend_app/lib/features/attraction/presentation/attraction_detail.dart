@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/models/attraction_models.dart'; // Import the Attraction model
 import '../data/services/api_service.dart'; // Import your ApiService
@@ -202,14 +203,31 @@ class _AttractionDetailState extends State<AttractionDetail> {
                         ),
                         shape: MaterialStateProperty.all(
                           const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero),
+                            borderRadius: BorderRadius.zero,
+                          ),
                         ),
                         padding: MaterialStateProperty.all(
                           const EdgeInsets.symmetric(vertical: 15),
                         ),
                       ),
-                      onPressed: () {
-                        // Implement call functionality
+                      onPressed: () async {
+                        const phoneNumber = '+251944353983';
+                        final url = 'tel:$phoneNumber'; // Creates a tel: link
+
+                        try {
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(Uri.parse(url));
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Could not launch phone call')),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
                       },
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -232,24 +250,36 @@ class _AttractionDetailState extends State<AttractionDetail> {
                         ),
                         shape: MaterialStateProperty.all(
                           const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero),
-                        ),
-                        padding: MaterialStateProperty.all(
-                          const EdgeInsets.symmetric(vertical: 15),
+                            borderRadius: BorderRadius.zero,
+                          ),
                         ),
                       ),
-                      onPressed: () {
-                        // Implement visit website functionality
+                      onPressed: () async {
+                        const url =
+                            'https://www.example.com'; // Hardcoded placeholder URL
+                        try {
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(Uri.parse(url));
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Could not open $url')),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
                       },
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.language, color: Colors.black),
-                          SizedBox(width: 8),
-                          Text(
-                            "Visit Website",
-                            style: TextStyle(color: Colors.black),
-                          ),
+                          SizedBox(
+                              width: 8), // Adds spacing between icon and text
+                          Text("Visit Website",
+                              style: TextStyle(color: Colors.black)),
                         ],
                       ),
                     ),
